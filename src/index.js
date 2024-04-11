@@ -27,13 +27,33 @@ const domLoaded = document.addEventListener("DOMContentLoaded", (e) => { });
 console.log("hi")
 
 const handleClick = (ramen) => { //ramen=the click event info
-  console.log("hi test")
-  let div = document.getElementById('ramen-detail')
-      let h2 = document.getElementsByClassName("name")
-      let h3 = document.getElementsByClassName("restaurant")  
-        h2.textContent = ramen.target.id
-        console.log(h2.textContent)
+
+  fetch(`http://localhost:3000/ramens/${ramen.target.id}`, {
+    method: "GET",
+    header: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify(ramen.id)
+  })
+    .then((resp) => resp.json())
+    .then((data) => ramenIdArr(data))
+
+  function ramenIdArr(newRamen) {
+    let div = document.getElementById('ramen-detail')
+    let h3 = document.getElementsByClassName("restaurant")[0]
+    let h2 = document.getElementsByClassName("name")[0]
+    h2.textContent = newRamen.name
+    h3.textContent = newRamen.restaurant
+    let rating = document.getElementById('rating-display')
+    rating.textContent = newRamen.rating
+    let comment = document.getElementById('comment-display')
+    comment.textContent = newRamen.comment
+    let pic = document.getElementsByClassName('detail-image')[0]
+    pic.src = newRamen.image
   }
+
+}
 
 const addSubmitListener = () => {
   const form = document.getElementById('new-ramen');
@@ -59,11 +79,11 @@ const displayRamens = (domLoaded) => {
     returnedData.forEach((eachRamen) => {
       let img = document.createElement('img')
       img.src = eachRamen.image
-      img.id = eachRamen.name
+      img.id = eachRamen.id
       menu.append(img)
       img.addEventListener('click', handleClick)
-      })
-      
+    })
+
   }
 };
 
