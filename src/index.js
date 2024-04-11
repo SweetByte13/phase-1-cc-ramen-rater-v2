@@ -23,12 +23,15 @@
 // Callbacks
 //when "ramen" class name is 'clicked' have div with ID ramen-detail update
 
-const domLoaded = document.addEventListener("DOMContentLoaded", (e) => { });
-console.log("hi")
+function afterLoad() {
+    let div = document.getElementById('ramen-detail')
+    let h3 = document.getElementsByClassName("restaurant")[0]
+    let h2 = document.getElementsByClassName("name")[0]
+    let rating = document.getElementById('rating-display')
+    let comment = document.getElementById('comment-display')
+    let pic = document.getElementsByClassName('detail-image')[0]
 
-const handleClick = (ramen) => { //ramen=the click event info
-
-  fetch(`http://localhost:3000/ramens/${ramen.id}`, {
+    fetch(`http://localhost:3000/ramens/1`, {
     method: "GET",
     header: {
       "Content-Type": "application/json",
@@ -36,51 +39,42 @@ const handleClick = (ramen) => { //ramen=the click event info
     },
   })
     .then((resp) => resp.json())
-    .then((data) => ramenIdArr(data))
-
-  function ramenIdArr(newRamen) {
-    let div = document.getElementById('ramen-detail')
-    let h3 = document.getElementsByClassName("restaurant")[0]
-    let h2 = document.getElementsByClassName("name")[0]
-    let rating = document.getElementById('rating-display')
-    let comment = document.getElementById('comment-display')
-    let pic = document.getElementsByClassName('detail-image')[0]
-    h2.textContent = newRamen.name
-    h3.textContent = newRamen.restaurant
-    rating.textContent = newRamen.rating
-    comment.textContent = newRamen.comment
-    pic.src = newRamen.image
-  }
+    .then((data) => {
+      h2.textContent = data.name
+      h3.textContent = data.restaurant
+      rating.textContent = data.rating
+      comment.textContent = data.comment
+      pic.src = data.image
+  console.log("hi")
+    })
+   
 }
 
+afterLoad();
 
 const addSubmitListener = (ramenForm) => {
-  ramenForm.addEventListener('submit', (e) => {
+  const form = document.getElementById('new-ramen');
+  form.addEventListener('submit', (e) => {
     e.preventDefault()
-    const form = document.getElementById('new-ramen');
-    const formNewRestaurant = document.getElementById("new-restaurant");
+
+    let formNewRestaurant = document.getElementById("new-restaurant");
     let formImage = document.getElementById("new-image");
-    const formRating = document.getElementById("new-rating");
-    const formComment = document.getElementById("new-comment")
-    const addNewRamen = document.getElementById("ramen-menu")
+    let formRating = document.getElementById("new-rating");
+    let formComment = document.getElementById("new-comment")
+    let addNewRamen = document.getElementById("ramen-menu")
     let img = document.createElement('img')
     let newRamenPic = formImage.textContent
     img.src = e.target.image.value
     addNewRamen.append(img)
 
     const newRamenFlavor = {
-      //id : e.target.id.value,
       name: e.target.name.value,
       image: e.target.image.value,
       restaurant: e.target.restaurant.value,
       rating: e.target.rating.value,
-      commment: formComment.value,
+      comment: formComment.value,
     }
     console.log(newRamenFlavor)
-
-    //ramenForm([newRamenFlavor]);
-    //newRamenFlavor to stringify send to json invoke RamenMenuData
-
 
     fetch("http://localhost:3000/ramens", {
       method: 'POST',
@@ -92,45 +86,77 @@ const addSubmitListener = (ramenForm) => {
     })
       .then((resp) => resp.json())
       .then((data) => console.log(data))
-    // ramenMenuData([data])
-  })}
+  })
+}
 
-  const displayRamens = (domLoaded) => {
-    fetch("http://localhost:3000/ramens", {
-      method: "GET",
-      header: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      }
-    })
-      .then((resp) => resp.json())
-      .then((data) => ramenMenuData(data))
-
-    function ramenMenuData(returnedData) {
-      returnedData.forEach((eachRamen) => {
-        let menu = document.getElementById("ramen-menu")
-        let img = document.createElement('img')
-        img.src = eachRamen.image
-        img.id = eachRamen.id
-        menu.append(img)
-        img.addEventListener('click', (e) => handleClick(e.currentTarget))
-      })
-
+const displayRamens = (domLoaded) => {
+  fetch("http://localhost:3000/ramens", {
+    method: "GET",
+    header: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
     }
-  };
+  })
+    .then((resp) => resp.json())
+    .then((data) => ramenMenuData(data))
 
-  const main = () => {
-    displayRamens();
-    const form = document.getElementById('new-ramen');
-    addSubmitListener(form);
+
+  //       pic.src = eachRamen.currentTarget
+  // console.log(pic.src)
+
+
+  function ramenMenuData(returnedData) {
+    returnedData.forEach((eachRamen) => {
+      let menu = document.getElementById("ramen-menu")
+      let img = document.createElement('img')
+      img.src = eachRamen.image
+      img.id = eachRamen.id
+      menu.append(img)
+      img.addEventListener('click', (e) => handleClick(e.currentTarget))
+    })
   }
+};
 
-  main();
+const handleClick = (ramen) => {
+  fetch(`http://localhost:3000/ramens/${ramen.id}`, {
+    method: "GET",
+    header: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+  })
+    .then((resp) => resp.json())
+    .then((data) => ramenIdArr(data))
 
-  export {
-    displayRamens,
-    addSubmitListener,
-    handleClick,
-    main,
-  };
+  function ramenIdArr(newRamen) {
+    console.log(newRamen)
+    let div = document.getElementById('ramen-detail')
+    let h3 = document.getElementsByClassName("restaurant")[0]
+    let h2 = document.getElementsByClassName("name")[0]
+    let rating = document.getElementById('rating-display')
+    let comment = document.getElementById('comment-display')
+    let pic = document.getElementsByClassName('detail-image')[0]
+    h2.textContent = newRamen.name
+    h3.textContent = newRamen.restaurant
+    rating.textContent = newRamen.rating
+    comment.innerText = newRamen.comment
+    pic.src = newRamen.image
+
+  }
+}
+
+const main = () => {
+  displayRamens();
+  const form = document.getElementById('new-ramen');
+  addSubmitListener(form);
+}
+
+main();
+
+export {
+  displayRamens,
+  addSubmitListener,
+  handleClick,
+  main,
+};
 
