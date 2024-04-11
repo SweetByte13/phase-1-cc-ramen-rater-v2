@@ -4,12 +4,12 @@
 //get request data from serve to get all ramen objects//
 //load each images to dom using img tag inside #ramen-menu div//
 //show details for first ramen when DOM loades, without click
-//click event listener on an image from the #ramen-menu div
-//fire a callback function called handleClick
+//click event listener on an image from the #ramen-menu div//
+//fire a callback function called handleClick//
 
 //import { target } from "happy-dom/cjs/PropertySymbol.cjs";
 
-//handleClick should show all information about that ramen displayed inside the #ramen-detail div, where it says insert comment/rating
+//handleClick should show all information about that ramen displayed inside the #ramen-detail div, where it says insert comment/rating//
 //Update the rating and comment for a ramen by submitting a form. Changes should be reflected on the frontend. No need to persist.add the HTML given in intro to the index.html file to create the edit form
 //updates persist (patch request)
 
@@ -28,13 +28,12 @@ console.log("hi")
 
 const handleClick = (ramen) => { //ramen=the click event info
 
-  fetch(`http://localhost:3000/ramens/${ramen.target.id}`, {
+  fetch(`http://localhost:3000/ramens/${ramen.id}`, {
     method: "GET",
     header: {
       "Content-Type": "application/json",
       "Accept": "application/json"
     },
-    body: JSON.stringify(ramen.id)
   })
     .then((resp) => resp.json())
     .then((data) => ramenIdArr(data))
@@ -43,61 +42,95 @@ const handleClick = (ramen) => { //ramen=the click event info
     let div = document.getElementById('ramen-detail')
     let h3 = document.getElementsByClassName("restaurant")[0]
     let h2 = document.getElementsByClassName("name")[0]
+    let rating = document.getElementById('rating-display')
+    let comment = document.getElementById('comment-display')
+    let pic = document.getElementsByClassName('detail-image')[0]
     h2.textContent = newRamen.name
     h3.textContent = newRamen.restaurant
-    let rating = document.getElementById('rating-display')
     rating.textContent = newRamen.rating
-    let comment = document.getElementById('comment-display')
     comment.textContent = newRamen.comment
-    let pic = document.getElementsByClassName('detail-image')[0]
     pic.src = newRamen.image
   }
-
 }
 
-const addSubmitListener = () => {
-  const form = document.getElementById('new-ramen');
-}
 
-document.addEventListener('submit', addSubmitListener)
+const addSubmitListener = (ramenForm) => {
+  ramenForm.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const form = document.getElementById('new-ramen');
+    const formNewRestaurant = document.getElementById("new-restaurant");
+    let formImage = document.getElementById("new-image");
+    const formRating = document.getElementById("new-rating");
+    const formComment = document.getElementById("new-comment")
+    const addNewRamen = document.getElementById("ramen-menu")
+    let img = document.createElement('img')
+    let newRamenPic = formImage.textContent
+    img.src = e.target.image.value
+    addNewRamen.append(img)
 
-
-const displayRamens = (domLoaded) => {
-  fetch("http://localhost:3000/ramens", {
-    method: "GET",
-    header: {
-      "Content-Type": "application/json",
-      "Accept": "application/json"
+    const newRamenFlavor = {
+      //id : e.target.id.value,
+      name: e.target.name.value,
+      image: e.target.image.value,
+      restaurant: e.target.restaurant.value,
+      rating: e.target.rating.value,
+      commment: formComment.value,
     }
-  })
-    .then((resp) => resp.json())
-    .then((data) => ramenMenuData(data))
+    console.log(newRamenFlavor)
 
-  let menu = document.getElementById("ramen-menu")
+    //ramenForm([newRamenFlavor]);
+    //newRamenFlavor to stringify send to json invoke RamenMenuData
 
-  function ramenMenuData(returnedData) {
-    returnedData.forEach((eachRamen) => {
-      let img = document.createElement('img')
-      img.src = eachRamen.image
-      img.id = eachRamen.id
-      menu.append(img)
-      img.addEventListener('click', handleClick)
+
+    fetch("http://localhost:3000/ramens", {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newRamenFlavor)
     })
+      .then((resp) => resp.json())
+      .then((data) => console.log(data))
+    // ramenMenuData([data])
+  })}
 
+  const displayRamens = (domLoaded) => {
+    fetch("http://localhost:3000/ramens", {
+      method: "GET",
+      header: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      }
+    })
+      .then((resp) => resp.json())
+      .then((data) => ramenMenuData(data))
+
+    function ramenMenuData(returnedData) {
+      returnedData.forEach((eachRamen) => {
+        let menu = document.getElementById("ramen-menu")
+        let img = document.createElement('img')
+        img.src = eachRamen.image
+        img.id = eachRamen.id
+        menu.append(img)
+        img.addEventListener('click', (e) => handleClick(e.currentTarget))
+      })
+
+    }
+  };
+
+  const main = () => {
+    displayRamens();
+    const form = document.getElementById('new-ramen');
+    addSubmitListener(form);
   }
-};
 
-const main = () => {
-  displayRamens();
-  addSubmitListener();
-}
+  main();
 
-main();
-
-export {
-  displayRamens,
-  addSubmitListener,
-  handleClick,
-  main,
-};
+  export {
+    displayRamens,
+    addSubmitListener,
+    handleClick,
+    main,
+  };
 
